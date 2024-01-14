@@ -97,5 +97,71 @@ function showGraph() {
             console.error("Error fetching data:", error);
         });
 }
+
+function showDayGraph() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let date = urlParams.get('date') || new Date().toISOString().slice(0, 10);
+    // 日付形式の変換（yyyy-mm-dd形式をyyyymmdd形式に変換）
+    if (date.match(/^\d{4}-\d{2}-\d{2}$/)) { // yyyy-mm-dd形式を確認
+        date = date.replace(/-/g, '');
+    }
+    console.log("date day graph: ",date);
+
+fetch(`/ten_min_aggregate?date=${date}`)
+    .then(response => response.json())
+    .then(data => {
+        console.log("Received day data:", data);
+
+        // データを整形
+        const labels = data.map(item => item.timestamp);
+        const carTruckTotals = data.map(item => item.car_truck_total);
+        const otherTotals = data.map(item => item.other_total);
+
+        // グラフを描画
+        const ctx = document.getElementById('dayChart').getContext('2d');
+        const dayChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Car and Truck Total',
+                    data: carTruckTotals,
+                    borderColor: 'rgb(75, 192, 192)',
+                    borderWidth: 2
+                }, {
+                    label: 'Other Total',
+                    data: otherTotals,
+                    borderColor: 'rgb(153, 102, 255)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            parser: 'yyyy-MM-dd HH:mm:ss',
+			tooltipFormat: 'yyyy-MM-dd HH:mm' // ツールチップ表示用フォーマット
+                        },
+                        title: {
+                            display: true,
+                            text: 'sum of every 10min'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }).catch(error => {
+        console.error("Error fetching data:", error);
+    });
+
+
+}
+
+showDayGraph();
+
 showGraph();
 showDailyData();

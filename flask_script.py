@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from glob import glob
 import pandas as pd
 from datetime import datetime, timedelta
@@ -79,6 +79,40 @@ def read_daily_csv(start_date, end_date):
         return pd.DataFrame()  # 空のDataFrameを返す
 
     return pd.concat(daily_dfs, ignore_index=True)
+
+def calculate_10min_aggregates(df, date):
+    # timestamp列のフォーマットを変更
+    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y%m%d_%H%M%S')
+
+    # 特定の日付のデータのみを選択
+    df = df[df['timestamp'].dt.date == date.date()]
+
+    # 'car_truck_total' と 'other_total' の計算
+    df['car_truck_total'] = df['car'] + df['truck']
+    other_columns = ['bicycle', 'motorbike', 'bus', 'person', 'bird', 'cat', 'dog', 'umbrella', 'suitcase', 'other']
+    df['other_total'] = df[other_columns].sum(axis=1)
+
+    # 10分ごとに集計
+    df.set_index('timestamp', inplace=True)
+    df_resampled = df.resample('10T').agg({'car_truck_total': 'sum', 'other_total': 'sum'})
+
+    # インデックス（時刻）を文字列に変換
+    df_resampled.index = df_resampled.index.strftime('%Y-%m-%d %H:%M:%S')
+
+    records = df_resampled.reset_index().to_dict(orient='records')
+    return records
+
+@app.route('/ten_min_aggregate', methods=['GET'])
+def ten_min_aggregate():
+    date_str = request.args.get('date')
+    try:
+        date = datetime.strptime(date_str, '%Y%m%d')
+    except ValueError:
+        return "日付形式が無効です。YYYYMMDD形式で指定してください。", 400
+
+    df = read_daily_csv(date, date)
+    records = calculate_10min_aggregates(df, date)
+    return jsonify(records)
 
 def aggregate_daily_data(df):
     # 日付ごとに集計
