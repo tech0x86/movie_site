@@ -82,8 +82,22 @@ def read_daily_csv(start_date, end_date):
 
 def aggregate_daily_data(df):
     # 日付ごとに集計
-    aggregated_data = df.groupby('date').sum()
-    print(f"sum: {aggregated_data}")
+    aggregated_data = df.groupby('date').sum(numeric_only=True)
+    # 日付のフォーマットを 'yyyy-mm-dd' に変更
+    aggregated_data = aggregated_data.reset_index()  # 'date'を列に戻す
+    aggregated_data['date'] = pd.to_datetime(aggregated_data['date']).dt.strftime('%Y-%m-%d')
+    #print(f"sum: {aggregated_data}")
+    return aggregated_data
+
+def aggregate_car_truck_other(df):
+    # 「トラックと車の合計」と「他の項目の合計」を計算
+    df['car_truck_total'] = df['car'] + df['truck']
+    other_columns = ['bicycle', 'motorbike', 'bus', 'person', 'bird', 'cat', 'dog', 'umbrella', 'suitcase', 'other']
+    df['other_total'] = df[other_columns].sum(axis=1)
+    # 日付ごとに集計
+    aggregated_data = df.groupby('date').agg({'car_truck_total': 'sum', 'other_total': 'sum'}).reset_index()
+    # 日付のフォーマットを "yyyy-mm-dd" 形式に変換
+    aggregated_data['date'] = aggregated_data['date'].dt.strftime('%Y-%m-%d')
     return aggregated_data
 
 @app.route('/daily_data', methods=['GET'])
@@ -100,6 +114,21 @@ def daily_data():
 
     df = read_daily_csv(start_date, end_date)
     aggregated_data = aggregate_daily_data(df)
+    return aggregated_data.to_json(orient='table')
+
+@app.route('/car_truck_data', methods=['GET'])
+def car_truck_data():
+    start_date = request.args.get('start_date', type=str)
+    end_date = request.args.get('end_date', type=str)
+    try:
+        start_date = datetime.strptime(start_date, '%Y%m%d')
+        end_date = datetime.strptime(end_date, '%Y%m%d')
+    except ValueError:
+        print(f"error date s{start_date}, e{end_date}")
+        return "日付形式が無効です。YYYYMMDD形式で指定してください。", 400
+
+    df = read_daily_csv(start_date, end_date)
+    aggregated_data = aggregate_car_truck_other(df)
     return aggregated_data.to_json(orient='table')
 
 if __name__ == '__main__':

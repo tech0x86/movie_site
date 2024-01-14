@@ -2,6 +2,24 @@
 <html>
 <head>
     <title>raspi4b2</title>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid black;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+</style>
+
+
 </head>
 <body>
     <h1>タイムラプス動画</h1>
@@ -26,14 +44,15 @@
         <button type="submit">動画を表示</button>
     </form>
 
-    <!-- 日別データ表示用のセクション -->
-    <div id="dailyData"></div>
-
     <!-- グラフ用のキャンバス -->
     <canvas id="myChart" width="400" height="400"></canvas>
 
     <!-- Chart.jsのスクリプト -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 日別データ表示用のセクション -->
+    <div id="dailyData"></div>
+
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 
 </body>
