@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from glob import glob
 import pandas as pd
 from datetime import datetime, timedelta
+import subprocess
 import os
 
 app = Flask(__name__)
@@ -170,6 +171,18 @@ def car_truck_data():
     df = read_daily_csv(start_date, end_date)
     aggregated_data = aggregate_car_truck_other(df)
     return aggregated_data.to_json(orient='table')
+
+@app.route('/create_movie', methods=['POST'])
+def create_movie():
+    data = request.json
+    date = data['date']
+
+    # ここでthis_script.pyを日付と共に実行する
+    script_path = os.path.join('/home/pi4b2/Desktop/camera_system', 'create_movie.py')
+    subprocess.run(['python3', script_path, date])
+
+    return jsonify({'message': 'Script executed successfully with date: ' + date})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

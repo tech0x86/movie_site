@@ -107,61 +107,89 @@ function showDayGraph() {
     }
     console.log("date day graph: ",date);
 
-fetch(`/ten_min_aggregate?date=${date}`)
-    .then(response => response.json())
-    .then(data => {
-        console.log("Received day data:", data);
+    fetch(`/ten_min_aggregate?date=${date}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Received day data:", data);
 
-        // データを整形
-        const labels = data.map(item => item.timestamp);
-        const carTruckTotals = data.map(item => item.car_truck_total);
-        const otherTotals = data.map(item => item.other_total);
+            // データを整形
+            const labels = data.map(item => item.timestamp);
+            const carTruckTotals = data.map(item => item.car_truck_total);
+            const otherTotals = data.map(item => item.other_total);
 
-        // グラフを描画
-        const ctx = document.getElementById('dayChart').getContext('2d');
-        const dayChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Car and Truck Total',
-                    data: carTruckTotals,
-                    borderColor: 'rgb(75, 192, 192)',
-                    borderWidth: 2
-                }, {
-                    label: 'Other Total',
-                    data: otherTotals,
-                    borderColor: 'rgb(153, 102, 255)',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            parser: 'yyyy-MM-dd HH:mm:ss',
-			tooltipFormat: 'yyyy-MM-dd HH:mm' // ツールチップ表示用フォーマット
+            // グラフを描画
+            const ctx = document.getElementById('dayChart').getContext('2d');
+            const dayChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Car and Truck Total',
+                        data: carTruckTotals,
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Other Total',
+                        data: otherTotals,
+                        borderColor: 'rgb(153, 102, 255)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                parser: 'yyyy-MM-dd HH:mm:ss',
+                tooltipFormat: 'yyyy-MM-dd HH:mm' // ツールチップ表示用フォーマット
+                            },
+                            title: {
+                                display: true,
+                                text: 'sum of every 10min'
+                            }
                         },
-                        title: {
-                            display: true,
-                            text: 'sum of every 10min'
+                        y: {
+                            beginAtZero: true
                         }
-                    },
-                    y: {
-                        beginAtZero: true
                     }
                 }
-            }
+            });
+        }).catch(error => {
+            console.error("Error fetching data:", error);
         });
-    }).catch(error => {
-        console.error("Error fetching data:", error);
-    });
-
-
 }
 
-showDayGraph();
+// Ajaxリクエストを送信する関数
+function runScriptWithDate(date) {
+    fetch('/create_movie', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({date: date})
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => console.error('Error:', error));
+}
 
+// ボタンクリックイベントの処理
+document.addEventListener('DOMContentLoaded', function() {
+    const runScriptBtn = document.getElementById('run-script-btn');
+    if (runScriptBtn) {
+        runScriptBtn.addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let date = urlParams.get('date') || new Date().toISOString().slice(0, 10);
+            if (date.match(/^\d{4}-\d{2}-\d{2}$/)) { 
+                date = date.replace(/-/g, '');
+            }
+            runScriptWithDate(date);
+        });
+    }
+});
+
+showDayGraph();
 showGraph();
 showDailyData();

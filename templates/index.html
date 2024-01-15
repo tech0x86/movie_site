@@ -51,13 +51,15 @@ th {
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <!-- Chart.jsのスクリプト -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
     <!-- 日別データ表示用のセクション -->
     <div id="dailyData"></div>
 
-<script src="{{ url_for('static', filename='main.js') }}"></script>
+    <button id="run-script-btn">表示中の日付で動画生成</button>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 
 </body>
 </html>
