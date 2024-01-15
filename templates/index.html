@@ -29,6 +29,12 @@ th {
     <a href="{{ url_for('index', date=prev_date.strftime('%Y%m%d')) }}">◀︎前日</a>
     <a href="{{ url_for('index', date=next_date.strftime('%Y%m%d')) }}">翌日▶︎</a>
 
+    <!-- 特定の日付の動画を表示するためのフォーム -->
+    <form action="/" method="get">
+        <input type="date" name="date">
+        <button type="submit">動画を表示</button>
+    </form>
+
     {% if latest_video %}
         <!-- 動画表示 -->
         <h2>{{ latest_video }}</h2>
@@ -39,12 +45,6 @@ th {
     {% else %}
         <p>指定された日付の動画はありません。</p>
     {% endif %}
-
-    <!-- 特定の日付の動画を表示するためのフォーム -->
-    <form action="/" method="get">
-        <input type="date" name="date">
-        <button type="submit">動画を表示</button>
-    </form>
 
     <canvas id="dayChart" width="400" height="200"></canvas>
     <!-- weeklyグラフ用のキャンバス -->
@@ -61,3 +61,4 @@ th {
 
 </body>
 </html>
+
