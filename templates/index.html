@@ -24,10 +24,10 @@ th {
 
 </head>
 <body>
-    <h1>タイムラプス動画</h1>
+    <h1>タイムラプス</h1>
     <!-- 日付ナビゲーション -->
-    <a href="{{ url_for('index', date=prev_date.strftime('%Y%m%d')) }}">◀︎前日</a>
-    <a href="{{ url_for('index', date=next_date.strftime('%Y%m%d')) }}">翌日▶︎</a>
+    <a href="{{ url_for('index', date=prev_date.strftime('%Y%m%d')) }}">■前日____</a>
+    <a href="{{ url_for('index', date=next_date.strftime('%Y%m%d')) }}">____翌日■</a>
 
     <!-- 特定の日付の動画を表示するためのフォーム -->
     <form action="/" method="get">
@@ -45,17 +45,19 @@ th {
     {% else %}
         <p>指定された日付の動画はありません。</p>
     {% endif %}
-
+<br>
     <canvas id="dayChart" width="400" height="200"></canvas>
+<br>
     <!-- weeklyグラフ用のキャンバス -->
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <!-- Chart.jsのスクリプト -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
+<br>
     <!-- 日別データ表示用のセクション -->
     <div id="dailyData"></div>
+<br>
 
     <button id="run-script-btn">表示中の日付で動画生成</button>
 
