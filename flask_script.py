@@ -6,8 +6,13 @@ import os
 
 app = Flask(__name__)
 
+def get_base_path():
+    # Get the directory of the current script
+    return os.path.dirname(os.path.abspath(__file__))
+
 def get_video_files():
-    video_dir = './static/movie_link'  # シンボリックリンクのパス
+    base_path = get_base_path()
+    video_dir = os.path.join(base_path, 'static', 'movie_link')  # Updated path
     video_files = sorted(os.listdir(video_dir), reverse=True)
     return video_files
 
@@ -61,9 +66,10 @@ def index():
                            next_date=next_date)
 
 def read_daily_csv(start_date, end_date):
-    # 日付範囲内のファイルパスを生成
+    base_path = get_base_path()
+    # Generate file paths within the date range
     date_range = pd.date_range(start=start_date, end=end_date)
-    file_paths = [f'./static/csv_link/{date.strftime("%Y%m%d")}.csv' for date in date_range]
+    file_paths = [os.path.join(base_path, 'static', 'csv_link', f'{date.strftime("%Y%m%d")}.csv') for date in date_range]
 
     # 各ファイルを読み込み、1つのDataFrameに結合
     daily_dfs = []
